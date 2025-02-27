@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using PDFService;
 
 namespace PDFSummarizerBE.Services
 {
@@ -238,18 +239,4 @@ namespace PDFSummarizerBE.Services
         public int CachedTokens { get; set; }
     }
 
-    public class SummaryResponse
-    {
-        [JsonPropertyName("summary")]
-        public List<SummaryTopic> Summary { get; set; }
-    }
-
-    public class SummaryTopic
-    {
-        [JsonPropertyName("topic")]
-        public string Topic { get; set; }
-
-        [JsonPropertyName("points")]
-        public List<string> Points { get; set; }
-    }
 }
