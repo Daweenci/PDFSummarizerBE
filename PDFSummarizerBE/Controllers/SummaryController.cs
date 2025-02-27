@@ -1,6 +1,8 @@
 ﻿using System.Text;
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using UglyToad.PdfPig;
+using PDFSummarizerBE.Services;
 
 namespace PDFSummarizerBE.Controllers
 {
@@ -18,23 +20,21 @@ namespace PDFSummarizerBE.Controllers
 
             try
             {
-                // Get the Downloads folder path
-                string downloadsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
-                string pdfTextFolderPath = Path.Combine(downloadsPath, "pdf_texts");
+                List<string> extractedTextPerPage = ExtractText(files);
 
-                // Ensure the "pdf_texts" folder exists
-                if (!Directory.Exists(pdfTextFolderPath))
+                OpenAiApi aiAgent = new(apiKey);
+                SummaryResponse result = await aiAgent.SummarizeText(extractedTextPerPage[0]);
+
+                if (result is null)
                 {
-                    Directory.CreateDirectory(pdfTextFolderPath);
+                    return StatusCode(500, new { message = "Error creating summary" });
                 }
 
-                List<string> extractedTextPerPage = ExtractText(files); 
-                
-                return Ok(new { message = "Text extracted and saved successfully" });
+                return Ok(JsonSerializer.Serialize(result));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Error extracting text", error = ex.Message });
+                return StatusCode(500, new { message = "Error creating summary", error = ex.Message });
             }
         }
         
