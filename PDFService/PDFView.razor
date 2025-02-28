@@ -1,6 +1,6 @@
-﻿@code{
+﻿@code {
     [Parameter]
-    public SummaryResponse Response { get; set; }
+    public SumarizerService.Models.OpenAIResponse.SummaryResponse Response { get; set; }
 }
 
 <!DOCTYPE html>
@@ -18,33 +18,36 @@
 
     <main>
         <h2>Themen Glossar</h2>
-        <div> 
-            @{var topicCounter1 = 1;}
+        <div>
+            @{
+                var topicCounter1 = 1;
+            }
             @foreach (var topic in Response.Summary)
             {
-                <label><a href="#topic@topicCounter1">@topic.Topic</a></label>
+                <label><a href="@($"#topic{topicCounter1}")">@topic.Topic</a></label>
                 <br>
-                topicCounter1++; 
-            }          
-        </div>
-		<br>
-        <div>
-			@{var topicCounter2 = 1;}
-            @foreach(var topic in Response.Summary)
-            {
-                <h3 id="topic@topicCounter2">@topic.Topic</h3>
-                <ul style="list-style-type: disc;">
-                @foreach (var point in topic.Points)
-                {
-                    <li>@point</li>
-                }
-                @{topicCounter2++;}
-                </ul>
+                topicCounter1++;
             }
         </div>
-        
+        <br>
+        <div>
+            @{
+                var topicCounter2 = 1;
+            }
+            @foreach (var topic in Response.Summary)
+            {
+                <h3 id="@($"topic{topicCounter2}")">@topic.Topic</h3>
+                <ul style="list-style-type: disc;">
+                    @foreach (var point in topic.Points)
+                    {
+                        <li>@point</li>
+                    }
+                </ul>
+                topicCounter2++;
+            }
+        </div>
+
     </main>
 
 </body>
 </html>
-

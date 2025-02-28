@@ -1,22 +1,25 @@
-﻿using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Playwright;
-
+using SumarizerService.Models.OpenAIResponse;
 namespace PDFService;
 
 public class PDFService
 {
-    public PDFService(SummaryResponse response)
+    private readonly ILogger<PDFService> _logger;
+
+    public PDFService(ILogger<PDFService> logger)
     {
-        InitializeAsync(response).GetAwaiter().GetResult();
+        _logger = logger;
     }
 
-    private async Task InitializeAsync(SummaryResponse response)
+    public async Task InitializeAsync(SummaryResponse response)
     {
+        _logger.LogInformation("Creating PDF from summary");
         Microsoft.Playwright.Program.Main(["install"]);
+
         IServiceCollection services = new ServiceCollection();
         services.AddLogging();
         var serviceProvider = services.BuildServiceProvider();
@@ -34,14 +37,14 @@ public class PDFService
         });
 
         using var playwright = await Playwright.CreateAsync();
-     
+
         var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
         {
-            Headless = true
+            Headless = false // Changed to false to allow UI interaction
         });
 
         string downloadPath = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
 
         var contextOptions = new BrowserNewContextOptions
         {
@@ -51,34 +54,15 @@ public class PDFService
         var context = await browser.NewContextAsync(contextOptions);
         var page = await context.NewPageAsync();
 
-        await page.SetContentAsync(await html);
-
         var pdfPath = Path.Combine(downloadPath, "summary.pdf");
 
+        // Generate the PDF
         await page.PdfAsync(new PagePdfOptions
         {
             Format = "A4",
             Path = pdfPath  // Path where the PDF will be saved
         });
 
-        await page.CloseAsync();
-        await browser.CloseAsync();
-
-        Console.WriteLine($"PDF downloaded at: {pdfPath}");
-
+        _logger.LogDebug("PDF downloaded at: {pdfPath}", pdfPath);
     }
-}
-public class SummaryResponse
-{
-    [JsonPropertyName("summary")]
-    public List<SummaryTopic> Summary { get; set; }
-}
-
-public class SummaryTopic
-{
-    [JsonPropertyName("topic")]
-    public string Topic { get; set; }
-
-    [JsonPropertyName("points")]
-    public List<string> Points { get; set; }
 }
