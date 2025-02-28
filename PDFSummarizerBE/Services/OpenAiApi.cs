@@ -1,6 +1,8 @@
-﻿using System.Text;
+﻿using SumarizerService.Models;
+using SumarizerService.Models.OpenAIRequest;
+using SumarizerService.Models.OpenAIResponse;
+using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace PDFSummarizerBE.Services
 {
@@ -98,11 +100,10 @@ namespace PDFSummarizerBE.Services
 
             this.messages[1] = new OpenAIMessage(Role.user, text);
 
-            var requestBody = new
+            OpenAIRequest requestBody = new()
             {
-                model = OpenAiApi.modelName,
-                messages = this.messages,
-                response_format = new { type = "json_object" }
+                Model = OpenAiApi.modelName,
+                Messages = this.messages
             };
 
             var requestJson = JsonSerializer.Serialize(requestBody);
@@ -112,144 +113,25 @@ namespace PDFSummarizerBE.Services
             try
             {
                 var response = await this._httpClient.PostAsync(OpenAiApi.deepSeekEndpoint, content);
-                // Check if response was successful
                 if(!response.IsSuccessStatusCode)
                 {
-                    // Print the error message
                     var responseString2 = await response.Content.ReadAsStringAsync();
                     throw new Exception(responseString2);
                 }
 
                 var responseString = await response.Content.ReadAsStringAsync();
                 var respnseStringWithoutNewLines = responseString.Replace("\n", "").Replace("\r", "");
-                var jsonResponse = JsonSerializer.Deserialize<DeepSeekResponse>(respnseStringWithoutNewLines);
+                var jsonResponse = JsonSerializer.Deserialize<OpenAIResponse>(responseString);
 
                 if (jsonResponse?.Choices == null || jsonResponse.Choices.Count == 0)
                     throw new Exception("Invalid API response: no choices returned.");
 
-                var messageContent = jsonResponse.Choices[0].Message.Content;
-
-                // 🚀 Now manually parse `content` string into `SummaryResponse`
-                var summaryResponse = JsonSerializer.Deserialize<SummaryResponse>(messageContent);
-
-                return summaryResponse ?? throw new Exception("Failed to parse summary response.");
+                return jsonResponse.Choices[0].Message.Content;
             }
             catch
             {
                 throw;
             }
         }
-    }
-
-    public class OpenAIMessage
-    {
-        [JsonPropertyName("role")]
-        public Role Role { get; set; }
-
-        [JsonPropertyName("content")]
-        public string Content { get; set; }
-
-        public OpenAIMessage(Role role, string content)
-        {
-            Role = role;
-            Content = content;
-        }
-    }
-
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum Role
-    {
-        system, 
-        user
-    }
-
-    public class DeepSeekResponse
-    {
-        [JsonPropertyName("id")]
-        public string Id { get; set; }
-
-        [JsonPropertyName("object")]
-        public string Object { get; set; }
-
-        [JsonPropertyName("created")]
-        public long Created { get; set; }
-
-        [JsonPropertyName("model")]
-        public string Model { get; set; }
-
-        [JsonPropertyName("choices")]
-        public List<Choice> Choices { get; set; }
-
-        [JsonPropertyName("usage")]
-        public Usage Usage { get; set; }
-
-        [JsonPropertyName("system_fingerprint")]
-        public string SystemFingerprint { get; set; }
-    }
-
-    public class Choice
-    {
-        [JsonPropertyName("index")]
-        public int Index { get; set; }
-
-        [JsonPropertyName("message")]
-        public Message Message { get; set; }
-
-        [JsonPropertyName("logprobs")]
-        public object LogProbs { get; set; }
-
-        [JsonPropertyName("finish_reason")]
-        public string FinishReason { get; set; }
-    }
-
-    public class Message
-    {
-        [JsonPropertyName("role")]
-        public string Role { get; set; }
-
-        [JsonPropertyName("content")]
-        public string Content { get; set; } // Store as string first
-    }
-
-    public class Usage
-    {
-        [JsonPropertyName("prompt_tokens")]
-        public int PromptTokens { get; set; }
-
-        [JsonPropertyName("completion_tokens")]
-        public int CompletionTokens { get; set; }
-
-        [JsonPropertyName("total_tokens")]
-        public int TotalTokens { get; set; }
-
-        [JsonPropertyName("prompt_tokens_details")]
-        public PromptTokensDetails PromptTokensDetails { get; set; }
-
-        [JsonPropertyName("prompt_cache_hit_tokens")]
-        public int PromptCacheHitTokens { get; set; }
-
-        [JsonPropertyName("prompt_cache_miss_tokens")]
-        public int PromptCacheMissTokens { get; set; }
-    }
-
-    public class PromptTokensDetails
-    {
-        [JsonPropertyName("cached_tokens")]
-        public int CachedTokens { get; set; }
-    }
-
-    public class SummaryResponse
-    {
-        [JsonPropertyName("summary")]
-        public List<SummaryTopic> Summary { get; set; }
-    }
-
-    public class SummaryTopic
-    {
-        [JsonPropertyName("topic")]
-        public string Topic { get; set; }
-
-        [JsonPropertyName("points")]
-        public List<string> Points { get; set; }
     }
 }

@@ -5,6 +5,8 @@ VisualStudioVersion = 17.10.35013.160
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PDFSummarizerBE", "PDFSummarizerBE\PDFSummarizerBE.csproj", "{21DDAD0A-7EF2-4151-924C-6694DEF07B78}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SumarizerService", "SumarizerService\SumarizerService.csproj", "{09022B8F-CFE5-4257-973C-67C2BE7F1B9F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{21DDAD0A-7EF2-4151-924C-6694DEF07B78}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{21DDAD0A-7EF2-4151-924C-6694DEF07B78}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{21DDAD0A-7EF2-4151-924C-6694DEF07B78}.Release|Any CPU.Build.0 = Release|Any CPU
+		{09022B8F-CFE5-4257-973C-67C2BE7F1B9F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09022B8F-CFE5-4257-973C-67C2BE7F1B9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09022B8F-CFE5-4257-973C-67C2BE7F1B9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09022B8F-CFE5-4257-973C-67C2BE7F1B9F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
