@@ -3,6 +3,8 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using UglyToad.PdfPig;
 using PDFSummarizerBE.Services;
+using PDFService;
+
 
 namespace PDFSummarizerBE.Controllers
 {
@@ -29,6 +31,10 @@ namespace PDFSummarizerBE.Controllers
                 {
                     return StatusCode(500, new { message = "Error creating summary" });
                 }
+
+
+                PDFService.PDFService pdfservice = new PDFService.PDFService(result);//PDF wird erstellt
+
 
                 return Ok(JsonSerializer.Serialize(result));
             }

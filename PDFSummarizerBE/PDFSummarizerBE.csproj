@@ -12,7 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SumarizerService\SumarizerService.csproj" />
+    <ProjectReference Include="..\PDFService\PDFService.csproj" />
   </ItemGroup>
+  
 
 </Project>

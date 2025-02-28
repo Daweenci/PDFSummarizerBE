@@ -1,0 +1,50 @@
+﻿@code{
+    [Parameter]
+    public SummaryResponse Response { get; set; }
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Document</title>
+</head>
+<body style="padding:0px 40px;">
+
+    <header>
+        <h1 style="text-align:center; margin:40px auto">Zusammenfassung</h1>
+    </header>
+
+    <main>
+        <h2>Themen Glossar</h2>
+        <div> 
+            @{var topicCounter1 = 1;}
+            @foreach (var topic in Response.Summary)
+            {
+                <label><a href="#topic@topicCounter1">@topic.Topic</a></label>
+                <br>
+                topicCounter1++; 
+            }          
+        </div>
+		<br>
+        <div>
+			@{var topicCounter2 = 1;}
+            @foreach(var topic in Response.Summary)
+            {
+                <h3 id="topic@topicCounter2">@topic.Topic</h3>
+                <ul style="list-style-type: disc;">
+                @foreach (var point in topic.Points)
+                {
+                    <li>@point</li>
+                }
+                @{topicCounter2++;}
+                </ul>
+            }
+        </div>
+        
+    </main>
+
+</body>
+</html>
+
