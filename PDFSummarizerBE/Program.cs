@@ -1,7 +1,5 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+using SumarizerService;
+using SumarizerService.Core;
 
 namespace PDFSummarizerBE
 {
@@ -15,6 +13,11 @@ namespace PDFSummarizerBE
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            builder.Services.AddSingleton<ISummarizerService, OpenAISummarizerService>();
+            builder.Services.AddSingleton<PDFService.PDFService>();
+            // Do the Logger Factory 
+            builder.Services.AddLogging();
 
             // Add CORS policy to allow requests from your Chrome extension
             builder.Services.AddCors(options =>

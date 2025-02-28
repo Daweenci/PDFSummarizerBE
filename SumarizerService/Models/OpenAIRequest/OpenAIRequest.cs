@@ -11,6 +11,6 @@ namespace SumarizerService.Models.OpenAIRequest
         public OpenAIMessage[] Messages { get; set; }
 
         [JsonPropertyName("response_format")]
-        public object ResponseFormat = new { type = "json_object" };
+        public object ResponseFormat { get; set; }
     }
 }

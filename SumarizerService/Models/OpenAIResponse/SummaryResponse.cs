@@ -5,6 +5,6 @@ namespace SumarizerService.Models.OpenAIResponse
     public class SummaryResponse
     {
         [JsonPropertyName("summary")]
-        public List<SummaryTopic> Summary { get; set; }
+        public required List<SummaryTopic> Summary { get; set; }
     }
 }

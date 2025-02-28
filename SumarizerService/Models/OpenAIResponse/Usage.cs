@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
+﻿using System.Text.Json.Serialization;
 
 namespace SumarizerService.Models.OpenAIResponse
 {
@@ -19,7 +14,7 @@ namespace SumarizerService.Models.OpenAIResponse
         public int TotalTokens { get; set; }
 
         [JsonPropertyName("prompt_tokens_details")]
-        public PromptTokensDetails PromptTokensDetails { get; set; }
+        public PromptTokensDetails? PromptTokensDetails { get; set; }
 
         [JsonPropertyName("prompt_cache_hit_tokens")]
         public int PromptCacheHitTokens { get; set; }

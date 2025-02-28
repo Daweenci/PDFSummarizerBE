@@ -1,13 +1,15 @@
-﻿using System.Text.Json.Serialization;
+﻿using SumarizerService.Extensions;
+using System.Text.Json.Serialization;
 
 namespace SumarizerService.Models.OpenAIResponse
 {
+    [JsonConverter(typeof(MessageConverter))]
     public class Message
     {
         [JsonPropertyName("role")]
-        public string Role { get; set; }
+        public required string Role { get; set; }
 
         [JsonPropertyName("content")]
-        public SummaryResponse Content { get; set; }
+        public required SummaryResponse Content { get; set; }
     }
 }

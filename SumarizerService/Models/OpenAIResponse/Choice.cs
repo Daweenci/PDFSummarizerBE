@@ -8,12 +8,12 @@ namespace SumarizerService.Models.OpenAIResponse
         public int Index { get; set; }
 
         [JsonPropertyName("message")]
-        public Message Message { get; set; }
+        public required Message Message { get; set; }
 
         [JsonPropertyName("logprobs")]
-        public object LogProbs { get; set; }
+        public required object LogProbs { get; set; }
 
         [JsonPropertyName("finish_reason")]
-        public string FinishReason { get; set; }
+        public required string FinishReason { get; set; }
     }
 }

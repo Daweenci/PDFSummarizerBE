@@ -1,10 +1,9 @@
-﻿using System.Text;
+﻿using Microsoft.AspNetCore.Mvc;
+using SumarizerService;
+using SumarizerService.Models.OpenAIResponse;
+using System.Text;
 using System.Text.Json;
-using Microsoft.AspNetCore.Mvc;
 using UglyToad.PdfPig;
-using PDFSummarizerBE.Services;
-using PDFService;
-
 
 namespace PDFSummarizerBE.Controllers
 {
@@ -12,6 +11,17 @@ namespace PDFSummarizerBE.Controllers
     [Route("[controller]")]
     public class SummaryController : ControllerBase
     {
+        private readonly ILogger<SummaryController> _logger;
+        private readonly ISummarizerService _openAISummarizerService;
+        private readonly PDFService.PDFService _pdfService;
+
+        public SummaryController(ILogger<SummaryController> logger, ISummarizerService openAISummarizerService, PDFService.PDFService pdfService)
+        {
+            _logger = logger;
+            _openAISummarizerService = openAISummarizerService;
+            _pdfService = pdfService;
+        }
+
         [HttpPost]
         public async Task<IActionResult> ReceivePdfs([FromHeader] string apiKey, List<IFormFile> files)
         {
@@ -24,17 +34,14 @@ namespace PDFSummarizerBE.Controllers
             {
                 List<string> extractedTextPerPage = ExtractText(files);
 
-                OpenAiApi aiAgent = new(apiKey);
-                SummaryResponse result = await aiAgent.SummarizeText(extractedTextPerPage[0]);
+                SummaryResponse result = await _openAISummarizerService.SummarizeText(extractedTextPerPage[0], apiKey);
 
                 if (result is null)
                 {
                     return StatusCode(500, new { message = "Error creating summary" });
                 }
 
-
-                PDFService.PDFService pdfservice = new PDFService.PDFService(result);//PDF wird erstellt
-
+                await _pdfService.InitializeAsync(result);
 
                 return Ok(JsonSerializer.Serialize(result));
             }
@@ -43,11 +50,11 @@ namespace PDFSummarizerBE.Controllers
                 return StatusCode(500, new { message = "Error creating summary", error = ex.Message });
             }
         }
-        
-        private List<string> ExtractText(List<IFormFile> files)
+
+        private static List<string> ExtractText(List<IFormFile> files)
         {
             List<string> fileTexts = [];
-            
+
             // Process each PDF file
             foreach (var file in files)
             {
@@ -56,7 +63,7 @@ namespace PDFSummarizerBE.Controllers
                 {
                     using var stream = file.OpenReadStream();
                     using var pdf = PdfDocument.Open(stream);
-                    
+
                     // Extract text from each page
                     foreach (var page in pdf.GetPages())
                     {
