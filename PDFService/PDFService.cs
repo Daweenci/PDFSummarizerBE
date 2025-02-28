@@ -63,6 +63,6 @@ public class PDFService
             Path = pdfPath  // Path where the PDF will be saved
         });
 
-        Console.WriteLine($"PDF downloaded at: {pdfPath}");
+        _logger.LogDebug("PDF downloaded at: {pdfPath}", pdfPath);
     }
 }
