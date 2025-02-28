@@ -1,4 +1,6 @@
-﻿using SumarizerService.Models;
+﻿using Microsoft.Extensions.Logging;
+using SumarizerService.Middleware;
+using SumarizerService.Models;
 using SumarizerService.Models.OpenAIRequest;
 using SumarizerService.Models.OpenAIResponse;
 using System.Security.Cryptography.X509Certificates;
@@ -18,23 +20,26 @@ namespace SumarizerService.Core
         /// <summary>
         /// Rough estimate (1 token = ~3 characters)
         /// </summary>
-        private readonly int _maxTokensPerRequest = 30000;
+        private readonly int _maxTokensPerRequest = 10000;
         private readonly string _instruction = """Du bist ein Experte für akademische Zusammenfassungen. Deine Aufgabe ist es, den gegebenen Text vollständig und detailliert zusammenzufassen, ohne dass relevante Informationen verloren gehen. Alle Konzepte, Begriffe und Theorien müssen vollständig und verständlich erklärt werden, auch wenn im Text keine direkte Erklärung dafür vorhanden ist. Falls ein Konzept oder Begriff ohne Erklärung auftaucht, füge eine vollständige und verständliche Erklärung hinzu, einschließlich praktischer Beispiele, wenn dies hilft, das Verständnis zu vertiefen. Es dürfen keine Themen ausgelassen oder stark verkürzt werden, da die Zusammenfassung zum Lernen für eine Klausur verwendet werden soll und daher genauso vollständig und informativ sein muss wie der Originaltext. Die Antwort muss lang genug sein, um alle wichtigen Details zu behandeln, und eine klare Struktur im JSON-Format aufweisen: {"summary":[{"topic": "Themenname", "points": ["Relevante Erklärung 1", "Relevante Erklärung 2", ...]}]} Achte darauf, dass auch komplexe Themen vollständig und detailliert erklärt werden, ohne sie zu verallgemeinern oder zu vereinfachen. Ergänze, wo möglich, praktische Beispiele, um das Verständnis der Konzepte zu fördern. Die Zusammenfassung muss alle Informationen enthalten, die für das Verständnis der Konzepte notwendig sind, und sollte als vollständige Lernressource dienen.""";
-        private readonly string? _apiKey;
+        private readonly IApiKeyProvider _apiKeyProvider;
         private readonly HttpClient _httpClient;
         private readonly OpenAIMessage[] _messages = new OpenAIMessage[2];
+        private readonly ILogger<OpenAISummarizerService> _logger;
         #endregion
 
         #region constructor
-        public OpenAISummarizerService()
+        public OpenAISummarizerService(IApiKeyProvider apiKeyProvider, ILogger<OpenAISummarizerService> logger)
         {
+            this._apiKeyProvider = apiKeyProvider;
+            this._logger = logger;
             this._httpClient = new HttpClient
             {
                 Timeout = TimeSpan.FromMinutes(5),
-                //DefaultRequestHeaders =
-                //{
-                //    Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", this._apiKey)
-                //}
+                DefaultRequestHeaders =
+                {
+                    Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", this._apiKeyProvider.ApiKey)
+                }
             };
 
             this._messages[0] = new OpenAIMessage { Role = Role.system, Content = this._instruction };
@@ -49,11 +54,8 @@ namespace SumarizerService.Core
         /// </summary>
         /// <param name="text">The text to summarize</param>
         /// <returns>the summarized text</returns>
-        public override async Task<SummaryResponse> SummarizeText(string text, string apiKey)
+        public override async Task<SummaryResponse> SummarizeText(string text)
         {
-            var length = text.Length;
-            this._httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey);
-
             List<string> textChunks = this.SplitTextIntoChunks(text);
             List<SummaryResponse> summaries = [];
 
@@ -118,10 +120,30 @@ namespace SumarizerService.Core
             string requestJson = JsonSerializer.Serialize(requestBody);
             var content = new StringContent(requestJson, Encoding.UTF8, "application/json");
 
-            using HttpResponseMessage response = await this._httpClient.PostAsync(url, content);
-            response.EnsureSuccessStatusCode();  // Throws if response is not 2xx
+            int maxRetries = 5; // Maximum number of retries before failing
+            int delayMilliseconds = 60000; // 1 minute initial delay
 
-            return await response.Content.ReadAsStringAsync();
+            for (int attempt = 0; attempt < maxRetries; attempt++)
+            {
+                using HttpResponseMessage response = await this._httpClient.PostAsync(url, content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadAsStringAsync();
+                }
+
+                if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests) // 429 Rate Limited
+                {
+                    _logger.LogDebug("Rate limited. Retrying in {DelaySeconds} seconds...", delayMilliseconds / 1000);
+                    await Task.Delay(delayMilliseconds);
+                }
+                else
+                {
+                    response.EnsureSuccessStatusCode(); // If not rate limited, throw exception
+                }
+            }
+
+            throw new Exception("Max retries reached due to rate limiting.");
         }
 
         private static SummaryResponse ParseResponse(string responseString)

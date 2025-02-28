@@ -1,5 +1,4 @@
-using SumarizerService;
-using SumarizerService.Core;
+using SumarizerService.Extensions;
 
 namespace PDFSummarizerBE
 {
@@ -14,7 +13,9 @@ namespace PDFSummarizerBE
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            builder.Services.AddSingleton<ISummarizerService, OpenAISummarizerService>();
+            builder.Services.AddSummarizerService();
+
+            // TODO: Move this to Extension Method
             builder.Services.AddSingleton<PDFService.PDFService>();
             // Do the Logger Factory 
             builder.Services.AddLogging();
@@ -41,7 +42,8 @@ namespace PDFSummarizerBE
 
             app.UseHttpsRedirection();
 
-            // Use CORS
+            app.UseApiKeyMiddleware();
+
             app.UseCors("AllowChromeExtension");
 
             app.UseAuthorization();
