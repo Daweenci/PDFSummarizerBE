@@ -3,6 +3,7 @@ using SumarizerService;
 using SumarizerService.Models;
 using System.Text;
 using System.Text.Json;
+using SumarizerService.Extensions;
 using UglyToad.PdfPig;
 
 namespace PDFSummarizerBE.Controllers
@@ -41,7 +42,7 @@ namespace PDFSummarizerBE.Controllers
                     return StatusCode(500, new { message = "Error creating summary" });
                 }
 
-                await _pdfService.InitializeAsync(results[0]);
+                await _pdfService.InitializeAsync(results.ToList().MergeSummaries());
 
                 return Ok(JsonSerializer.Serialize(results));
             }

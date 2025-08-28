@@ -7,7 +7,7 @@ using SumarizerService.Models;
 
 namespace SumarizerService.Extensions
 {
-    internal static class SummaryResponseExtensions
+    public static class SummaryResponseExtensions
     {
         public static SummaryResponse MergeSummaries(this IEnumerable<SummaryResponse> summaries)
         {

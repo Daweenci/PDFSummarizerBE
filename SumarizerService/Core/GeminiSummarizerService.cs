@@ -11,7 +11,7 @@ namespace SumarizerService.Core
     {
 
         #region private properties
-        private readonly int _maxTokensPerRequest = 10000;
+        private readonly int _maxTokensPerRequest = 100000;
         private readonly string _instruction = """Du bist ein Experte für akademische Zusammenfassungen. Deine Aufgabe ist es, den gegebenen Text vollständig und detailliert zusammenzufassen, ohne dass relevante Informationen verloren gehen. Alle Konzepte, Begriffe und Theorien müssen vollständig und verständlich erklärt werden, auch wenn im Text keine direkte Erklärung dafür vorhanden ist. Falls ein Konzept oder Begriff ohne Erklärung auftaucht, füge eine vollständige und verständliche Erklärung hinzu, einschließlich praktischer Beispiele, wenn dies hilft, das Verständnis zu vertiefen. Es dürfen keine Themen ausgelassen oder stark verkürzt werden, da die Zusammenfassung zum Lernen für eine Klausur verwendet werden soll und daher genauso vollständig und informativ sein muss wie der Originaltext. Die Antwort muss lang genug sein, um alle wichtigen Details zu behandeln, und eine klare Struktur im JSON-Format aufweisen: {"summary":[{"topic": "Themenname", "points": ["Relevante Erklärung 1", "Relevante Erklärung 2", ...]}]} Achte darauf, dass auch komplexe Themen vollständig und detailliert erklärt werden, ohne sie zu verallgemeinern oder zu vereinfachen. Ergänze, wo möglich, praktische Beispiele, um das Verständnis der Konzepte zu fördern. Die Zusammenfassung muss alle Informationen enthalten, die für das Verständnis der Konzepte notwendig sind, und sollte als vollständige Lernressource dienen.""";
         private readonly IApiKeyProvider _apiKeyProvider;
         private readonly HttpClient _httpClient;
@@ -20,7 +20,7 @@ namespace SumarizerService.Core
 
         public override string ModelName => "gemini-2.5-flash";
 
-        public override Uri Endpoint => new("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent");
+        public override Uri Endpoint => new("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-preview-05-06:generateContent");
 
         #region constructor
         public GeminiSummarizerService(IApiKeyProvider apiKeyProvider, ILogger<GeminiSummarizerService> logger)
@@ -108,7 +108,7 @@ namespace SumarizerService.Core
             var content = new StringContent(requestJson, Encoding.UTF8, "application/json");
 
             int maxRetries = 5; // Maximum number of retries before failing
-            int delayMilliseconds = 60000; // 1 minute initial delay
+            int delayMilliseconds = 65000; // 1 minute initial delay
 
             for (int attempt = 0; attempt < maxRetries; attempt++)
             {
