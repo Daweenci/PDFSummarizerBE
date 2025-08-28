@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using SumarizerService.Extensions;
 using SumarizerService.Middleware;
 using SumarizerService.Models;
 using SumarizerService.Models.OpenAIRequest;

@@ -25,7 +25,7 @@ namespace PDFSummarizerBE
             {
                 options.AddPolicy("AllowChromeExtension", policy =>
                 {
-                    policy.WithOrigins("chrome-extension://peencgpbdombagfanidjadihmbihkife")
+                    policy.WithOrigins("chrome-extension://meedgfhcijenfiijaecfiomilomkocdl")
                           .AllowAnyMethod()
                           .AllowAnyHeader();
                 });

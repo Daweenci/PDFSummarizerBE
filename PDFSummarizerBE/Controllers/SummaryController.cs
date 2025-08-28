@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SumarizerService;
-using SumarizerService.Models.OpenAIResponse;
+using SumarizerService.Models;
 using System.Text;
 using System.Text.Json;
 using UglyToad.PdfPig;
