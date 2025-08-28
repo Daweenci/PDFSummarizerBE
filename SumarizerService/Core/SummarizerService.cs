@@ -1,4 +1,5 @@
-﻿using SumarizerService.Models.OpenAIResponse;
+﻿using SumarizerService.Models;
+using SumarizerService.Models.OpenAIResponse;
 
 namespace SumarizerService.Core
 {

@@ -3,6 +3,7 @@ using SumarizerService;
 using SumarizerService.Models.OpenAIResponse;
 using System.Text;
 using System.Text.Json;
+using SumarizerService.Models;
 using UglyToad.PdfPig;
 
 namespace PDFSummarizerBE.Controllers

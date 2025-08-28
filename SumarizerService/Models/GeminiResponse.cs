@@ -6,32 +6,34 @@ namespace SumarizerService.Models
 {
     public class GeminiResponse
     {
-        [JsonPropertyName("candidates")]
-        public Candidate[] Candidates { get; set; }
+        [JsonPropertyName("candidates")] public Candidate[] Candidates { get; set; }
 
-        [JsonPropertyName("usageMetadata")]
-        public UsageMetadata UsageMetadata { get; set; }
+        [JsonPropertyName("usageMetadata")] public UsageMetadata UsageMetadata { get; set; }
 
-        [JsonPropertyName("modelVersion")]
-        public string ModelVersion { get; set; }
+        [JsonPropertyName("modelVersion")] public string ModelVersion { get; set; }
 
-        [JsonPropertyName("responseId")]
-        public string ResponseId { get; set; }
+        [JsonPropertyName("responseId")] public string ResponseId { get; set; }
     }
 
     public class Candidate
     {
-        [JsonPropertyName("content")]
-        public Content Content { get; set; }
+        [JsonPropertyName("content")] public ResponseContent Content { get; set; }
 
-        [JsonPropertyName("finishReason")]
-        public string FinishReason { get; set; }
+        [JsonPropertyName("finishReason")] public string FinishReason { get; set; }
 
-        [JsonPropertyName("index")]
-        public int Index { get; set; }
+        [JsonPropertyName("index")] public int Index { get; set; }
     }
 
-    public class UsageMetadata
+    public class ResponseContent
+    {
+        [JsonPropertyName("role")]
+        public string Role { get; set; }
+    
+        [JsonPropertyName("parts")]
+        public List<Part> Parts { get; set; } = new List<Part>();
+    }
+
+public class UsageMetadata
     {
         [JsonPropertyName("promptTokenCount")]
         public int PromptTokenCount { get; set; }
@@ -62,7 +64,7 @@ namespace SumarizerService.Models
     public class SummaryResponse
     {
         [JsonPropertyName("summary")]
-        public SummaryTopic[] Summary { get; set; }
+        public List<SummaryTopic> Summary { get; set; }
     }
 
     public class SummaryTopic
@@ -71,6 +73,6 @@ namespace SumarizerService.Models
         public string Topic { get; set; }
 
         [JsonPropertyName("points")]
-        public string[] Points { get; set; }
+        public List<string> Points { get; set; }
     }
 }

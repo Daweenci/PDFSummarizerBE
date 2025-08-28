@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using SumarizerService.Models.OpenAIResponse;
+using SumarizerService.Models;
 
 namespace SumarizerService.Extensions
 {

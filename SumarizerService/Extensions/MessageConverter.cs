@@ -1,6 +1,7 @@
 ﻿using SumarizerService.Models.OpenAIResponse;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using SumarizerService.Models;
 
 namespace SumarizerService.Extensions
 {

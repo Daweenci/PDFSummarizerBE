@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using SumarizerService.Extensions;
@@ -47,11 +48,19 @@ namespace SumarizerService.Core
 
             foreach (string chunk in textChunks)
             {
-                string[] alreadySummarizedTopics = [.. summaries
-                    .SelectMany(s => s.Summary.Select(t => t.Topic))
-                    .Distinct()];
-
-                summaries.Add(await SendSummaryRequestToAPI(chunk, alreadySummarizedTopics));
+                string[] alreadySummarizedTopics =
+                [
+                    .. summaries
+                        .SelectMany(s => s.Summary.Select(t => t.Topic))
+                        .Distinct()
+                ];
+                var geminiResponse = await SendSummaryRequestToAPI(chunk, alreadySummarizedTopics);
+                SummaryResponse? summaryResponse = JsonSerializer.Deserialize<SummaryResponse>(geminiResponse.Candidates[0].Content.Parts[0].Text);
+                if (summaryResponse is null)
+                {
+                    throw new ArgumentNullException();
+                }
+                summaries.Add(summaryResponse);
             }
 
             return summaries.MergeSummaries();
@@ -82,12 +91,12 @@ namespace SumarizerService.Core
             return chunks;
         }
 
-        private async Task<GeminiRequest> SendSummaryRequestToAPI(string textChunk, string[] alreadySummarizedTopics)
+        private async Task<GeminiResponse> SendSummaryRequestToAPI(string textChunk, string[] alreadySummarizedTopics)
         {
             string text = UpdateUserMessage(textChunk, alreadySummarizedTopics);
             GeminiRequest requestBody = new GeminiRequest(text, this._instruction);
             
-            return ParseResponse<GeminiRequest>(await SendPostRequestAsync(this.Endpoint, requestBody));
+            return ParseResponse<GeminiResponse>(await SendPostRequestAsync(this.Endpoint, requestBody));
         }
 
         private static T ParseResponse<T>(string responseString) where T : class
