@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Playwright;
 using SumarizerService.Models;
-using SumarizerService.Models.OpenAIResponse;
+
 namespace PDFService;
 
 public class PDFService
@@ -26,7 +26,8 @@ public class PDFService
         var serviceProvider = services.BuildServiceProvider();
         var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
         await using var htmlRenderer = new HtmlRenderer(serviceProvider, loggerFactory);
-        var html = htmlRenderer.Dispatcher.InvokeAsync(async () =>
+
+        var html = await htmlRenderer.Dispatcher.InvokeAsync(async () =>
         {
             var dictionary = new Dictionary<string, object?>
             {
@@ -37,23 +38,28 @@ public class PDFService
             return output.ToHtmlString();
         });
 
+        // Save HTML to a file
+        string downloadPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
+
+        string htmlFilePath = Path.Combine(downloadPath, "summary.html");
+
+        await File.WriteAllTextAsync(htmlFilePath, html);
+
+        _logger.LogInformation("HTML file created at: {path}", htmlFilePath);
+
         using var playwright = await Playwright.CreateAsync();
 
         var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
         {
-            Headless = false // Changed to false to allow UI interaction
+            Headless = false // Open a real browser window
         });
 
-        string downloadPath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
-
-        var contextOptions = new BrowserNewContextOptions
-        {
-            AcceptDownloads = true // Make sure the browser accepts downloads
-        };
-
-        var context = await browser.NewContextAsync(contextOptions);
+        var context = await browser.NewContextAsync();
         var page = await context.NewPageAsync();
+
+        // Open the local HTML file
+        await page.GotoAsync(new Uri(htmlFilePath).AbsoluteUri);
 
         var pdfPath = Path.Combine(downloadPath, "summary.pdf");
 
@@ -64,6 +70,6 @@ public class PDFService
             Path = pdfPath  // Path where the PDF will be saved
         });
 
-        _logger.LogDebug("PDF downloaded at: {pdfPath}", pdfPath);
+        _logger.LogInformation("Browser opened and displaying the HTML file.");
     }
 }

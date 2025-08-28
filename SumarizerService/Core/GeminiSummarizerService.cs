@@ -1,18 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using SumarizerService.Extensions;
 using SumarizerService.Middleware;
 using SumarizerService.Models;
-using SumarizerService.Models.OpenAIRequest;
-using SumarizerService.Models.OpenAIResponse;
-using static System.Net.WebRequestMethods;
 
 namespace SumarizerService.Core
 {

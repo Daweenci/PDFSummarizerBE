@@ -10,7 +10,7 @@ namespace SumarizerService.Extensions
         public static IServiceCollection AddSummarizerService(this IServiceCollection services)
         {
             services.AddSingleton<IApiKeyProvider, ApiKeyProvider>();
-            services.AddSingleton<ISummarizerService, GeminiSummarizerService>();
+            services.AddSingleton<ISummarizerService, OpenAISummarizerService>();
             return services;
         }
 
