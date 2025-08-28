@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using SumarizerService.Extensions;
 using SumarizerService.Middleware;
 using SumarizerService.Models;
 using SumarizerService.Models.OpenAIRequest;
@@ -68,7 +69,7 @@ namespace SumarizerService.Core
                 summaries.Add(await SendSummaryRequestToAPI(chunk, alreadySummarizedTopics));
             }
 
-            return MergeSummaries(summaries);
+            return summaries.MergeSummaries();
         }
         #endregion
 
@@ -157,32 +158,6 @@ namespace SumarizerService.Core
             }
 
             return jsonResponse.Choices[0].Message.Content;
-        }
-
-        private static SummaryResponse MergeSummaries(List<SummaryResponse> summaries)
-        {
-            var mergedSummary = new SummaryResponse
-            {
-                Summary = []
-            };
-
-            foreach (var summary in summaries)
-            {
-                foreach (var topic in summary.Summary)
-                {
-                    var existingTopic = mergedSummary.Summary.FirstOrDefault(t => t.Topic == topic.Topic);
-                    if (existingTopic == null)
-                    {
-                        mergedSummary.Summary.Add(topic);
-                    }
-                    else
-                    {
-                        existingTopic.Points.AddRange(topic.Points);
-                    }
-                }
-            }
-
-            return mergedSummary;
         }
 
         private List<string> SplitTextIntoChunks(string text)
